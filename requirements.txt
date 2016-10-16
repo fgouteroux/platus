@@ -1,0 +1,10 @@
+Flask-Assets
+Flask
+pyScss
+cssmin
+Flask-HTTPAuth
+Flask-WTF
+pyyaml
+celery
+pymongo
+requests

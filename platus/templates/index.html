@@ -1,0 +1,34 @@
+{% include 'header.html' %}
+{% block content %}
+
+    <nav class="navbar navbar-header navbar-fixed-top">
+        <a class="navbar-brand" href="/">Platform Status</a>
+    </nav>
+
+    <div class="container">  
+        <h3> Platform Health:</h3>
+        <table class="table small-text">
+            <thead>
+                <th>Type</th>
+                <th>Name</th>
+                <th>Node</th>
+                <th>Status</th>
+                <th>Checked At</th>
+                <th>Elapsed Time</th>
+            </thead>
+            <tbody>
+           {% for plugin in plugins %}
+                <tr>
+                    <td>{{ plugin.type | default("n/a")}}</td>
+                    <td>{{ plugin.name | default("n/a")}}</td>
+                    <td>{{ plugin.node | default("n/a")}}</td>
+                    <td {% if plugin.state == "operational" %} class="btn btn-success" {% else %} class="btn btn-danger"{% endif %}>{{ plugin.state | default("n/a")}}</td>
+                    <td>{{ plugin.checked | default("n/a")}}</td>
+                    <td>{{ plugin.elapsed | default("n/a") }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
+{% include 'footer.html' %}
