@@ -313,6 +313,11 @@ Pull requests are welcome.
 2. Make one or more well commented and clean commits to the repository. You can make a new branch here if you are modifying more than one part or feature.
 3. Perform a pull request
 
+
+## Contributors
+- Ahmet Demir ([flask-skeleton](https://github.com/ahmet2mir/flask-skeleton)) | [e-mail](mailto:ahmet2mir+github@gmail.com) | [Twitter](https://twitter.com/ahmet2mir) | [GitHub](https://github.com/ahmet2mir)
+
+
 License
 -------
 
