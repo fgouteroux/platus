@@ -1,0 +1,15 @@
+admin:
+    role:
+        - admin
+    password: admin
+
+user1:
+    role:
+        - dev
+    password: pass
+
+user2:
+    role:
+        - dev
+        - app
+    password: pass

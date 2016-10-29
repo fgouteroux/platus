@@ -1,0 +1,36 @@
+---
+gitlab:
+    role: admin
+    type: rest_http
+    properties:
+        host: status.aws.amazon.com
+        port: 443
+        protocol: https
+    data:
+        type: App
+        name: myapp01
+
+github:
+    role: 
+        - app
+    type: rest_http
+    properties:
+        host: status.github.com
+        port: 443
+        protocol: https
+    data:
+        type: App
+        name: myapp02
+
+gitlab:
+    role: 
+        - dev
+        - app
+    type: rest_http
+    properties:
+        host: gitlab.com
+        port: 443
+        protocol: https
+    data:
+        type: App
+        name: myapp03

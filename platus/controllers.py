@@ -17,8 +17,7 @@ from datetime import datetime
 # Import third party libs
 from flask import current_app as app
 
-
-def plugins_status():
+def plugins_status(roles):
     """Check plugins health"""
 
     log = app.logger
@@ -33,44 +32,47 @@ def plugins_status():
         return [message]
 
     for name, plugin in six.iteritems(get_plugins):
-        plugin_type = plugin["type"]
 
-        try:
-            log.debug("Read plugin %s" % name)
-            log.debug("Try importing plugin %s" % plugin_type)
-            call_plugin = importlib.import_module("platus.plugins.{0}"\
-                                                  .format(plugin_type))
-            client = call_plugin.login(**plugin["properties"])
-            status = call_plugin.check_health(client, plugin["data"])
+        if "admin" in roles or set(roles) & set(plugin["role"]):
+            plugin_type = plugin["type"]
 
-            log.debug("Plugin status: %s" % status)
+            try:
+                log.debug("Read plugin %s" % name)
+                log.debug("Try importing plugin %s" % plugin_type)
+                call_plugin = importlib.import_module("platus.plugins.{0}"\
+                                                      .format(plugin_type))
 
-            if isinstance(status, list):
-                for i in status:
-                    p_status.append(i)
-            else:
-                p_status.append(status)
+                client = call_plugin.login(**plugin["properties"])
+                status = call_plugin.check_health(client, plugin["data"])
 
-        except RuntimeError, error:
-            host = plugin["properties"]['host']
-            if isinstance(host, list):
-                for item in host:
+                log.debug("Plugin status: %s" % status)
+
+                if isinstance(status, list):
+                    for i in status:
+                        p_status.append(i)
+                else:
+                    p_status.append(status)
+
+            except RuntimeError, error:
+                host = plugin["properties"]['host']
+                if isinstance(host, list):
+                    for item in host:
+                        status = {"type": plugin["data"]["type"],
+                                  "name": plugin["data"]["name"],
+                                  "node": item,
+                                  "state": "down",
+                                  "checked": str(datetime.now())
+                                 }
+                else:
                     status = {"type": plugin["data"]["type"],
                               "name": plugin["data"]["name"],
-                              "node": item,
+                              "node": host,
                               "state": "down",
                               "checked": str(datetime.now())
                              }
-            else:
-                status = {"type": plugin["data"]["type"],
-                          "name": plugin["data"]["name"],
-                          "node": host,
-                          "state": "down",
-                          "checked": str(datetime.now())
-                         }
 
-            p_status.append(status)
-            log.error("Unable to get plugin status. Reason: %s" % error)
+                p_status.append(status)
+                log.error("Unable to get plugin status. Reason: %s" % error)
 
     if p_status:
         return sorted(p_status, key=lambda plug: plug['type'])

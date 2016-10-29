@@ -18,7 +18,9 @@ application = Flask(__name__,\
 application.register_blueprint(web)
 application.register_blueprint(api)
 
-application.config['plugins'] = "platus/plugins.yaml"
+application.config['plugins'] = "plugins.yaml"
+application.config['users'] = "users.yaml"
+
 # Scss
 assets = Environment(application)
 assets.versions = 'timestamp'

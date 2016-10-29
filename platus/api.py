@@ -7,7 +7,7 @@ import requests
 from flask import Blueprint, render_template, request, jsonify
 
 from platus import controllers
-from platus.auth import auth
+from platus.auth import auth, get_roles
 
 api = Blueprint("api", __name__, url_prefix='/api/v1.0')
 
@@ -24,7 +24,8 @@ def health():
 def status():
     try:
         if request.method == "GET":
-            return jsonify({'result': controllers.plugins_status()}), 200
+            roles = get_roles(auth.username())
+            return jsonify({'result': controllers.plugins_status(roles)}), 200
     except:
         raise
         return jsonify({'result': 'none'}), 401
