@@ -1,6 +1,7 @@
 ## Platus
 
 Platus is an python flask app to check **platform's health.** The name come from **platform** and **status**.
+You defines wich services you want to monitor and host it on your own server. Services check are based on plugin system.
 
 Currently supported plugins:
 
@@ -50,26 +51,40 @@ Response:
 }
 ```
 
-**Platus Auth**
+**Platus Users**
 
-Change default user/pass (admin/admin) in **platus/auth.py**
+Manage users and roles in **users.yaml** (default path in main.py).
 
-```python
-    allowed_users = {
-        "admin": {
-            "password": "admin"
-        }
-    }
+Use **roles** to grant permissions to get services status defined in **services.yaml**
+
+
+```yaml
+admin:
+    role:
+        - admin
+    password: admin
+
+user1:
+    role:
+        - dev
+    password: pass
+
+user2:
+    role:
+        - dev
+        - app
+    password: pass
 ```
 
-**Platus plugins**
+**Platus services**
 
-Create **plugins.yaml** (default path in main.py). 
+Create **services.yaml** (default path in main.py).
 
-    application.config['plugins'] = "platus/plugins.yaml"
+    application.config['services'] = "services.yaml"
 
 ```yaml
 resource01:
+    role: dev
     type: plugin_to_call
     properties:
         host: resource1.lan
@@ -78,6 +93,19 @@ resource01:
     data:
         type: App
         name: myapp01
+
+resource02:
+    role:
+        - app
+        - dev
+    type: plugin_to_call
+    properties:
+        host: resource2.lan
+        port: 80
+        protocol: http
+    data:
+        type: App
+        name: myapp02
 ```
 
 ## Plugins Usage
@@ -299,9 +327,9 @@ The **check_health** function must return a **dict** or a **list of dict** with 
 - checked
 
 ## Todo
-
-- Better way to provide user access (auth.py)
-- Secure sensitive infos in plugins.yaml
+- Notification system (email, slack...)
+- Storage backend to store services status
+- Secure sensitive infos in services.yaml
 - rest_http search improvements, regex...
 - Unit tests
 
