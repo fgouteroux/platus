@@ -25,7 +25,7 @@ def status():
     try:
         if request.method == "GET":
             roles = get_roles(auth.username())
-            return jsonify({'result': controllers.plugins_status(roles)}), 200
+            return jsonify({'result': controllers.services_status(roles)}), 200
     except:
         raise
         return jsonify({'result': 'none'}), 401

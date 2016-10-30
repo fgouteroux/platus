@@ -18,7 +18,7 @@ def index():
     try:
         if request.method == "GET":
             roles = get_roles(auth.username())
-            return render_template('index.html', plugins=controllers.plugins_status(roles))
+            return render_template('index.html', plugins=controllers.services_status(roles))
     except:
         raise
         return jsonify({'result': 'none'}), 401

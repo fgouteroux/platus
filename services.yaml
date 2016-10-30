@@ -1,5 +1,5 @@
 ---
-gitlab:
+aws:
     role: admin
     type: rest_http
     properties:

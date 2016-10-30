@@ -17,35 +17,35 @@ from datetime import datetime
 # Import third party libs
 from flask import current_app as app
 
-def plugins_status(roles):
-    """Check plugins health"""
+def services_status(roles):
+    """Check services health"""
 
     log = app.logger
     p_status = []
 
     try:
-        with open(app.config['plugins'], 'r') as content:
-            get_plugins = yaml.load(content)
+        with open(app.config['services'], 'r') as content:
+            get_services = yaml.load(content)
     except IOError:
-        message = "Config file not found for plugins"
+        message = "Config file not found for services"
         log.error(message)
         return [message]
 
-    for name, plugin in six.iteritems(get_plugins):
+    for name, service in six.iteritems(get_services):
 
-        if "admin" in roles or set(roles) & set(plugin["role"]):
-            plugin_type = plugin["type"]
+        if "admin" in roles or (set(roles) & set(service["role"])):
+            plugin = service["type"]
 
             try:
-                log.debug("Read plugin %s" % name)
-                log.debug("Try importing plugin %s" % plugin_type)
-                call_plugin = importlib.import_module("platus.plugins.{0}"\
-                                                      .format(plugin_type))
+                log.debug("Read service %s" % name)
+                log.debug("Try importing plugin %s" % plugin)
+                call_service = importlib.import_module("platus.plugins.{0}"\
+                                                      .format(plugin))
 
-                client = call_plugin.login(**plugin["properties"])
-                status = call_plugin.check_health(client, plugin["data"])
+                client = call_service.login(**service["properties"])
+                status = call_service.check_health(client, service["data"])
 
-                log.debug("Plugin status: %s" % status)
+                log.debug("service status: %s" % status)
 
                 if isinstance(status, list):
                     for i in status:
@@ -54,25 +54,25 @@ def plugins_status(roles):
                     p_status.append(status)
 
             except RuntimeError, error:
-                host = plugin["properties"]['host']
+                host = service["properties"]['host']
                 if isinstance(host, list):
                     for item in host:
-                        status = {"type": plugin["data"]["type"],
-                                  "name": plugin["data"]["name"],
+                        status = {"type": service["data"]["type"],
+                                  "name": service["data"]["name"],
                                   "node": item,
                                   "state": "down",
                                   "checked": str(datetime.now())
                                  }
                 else:
-                    status = {"type": plugin["data"]["type"],
-                              "name": plugin["data"]["name"],
+                    status = {"type": service["data"]["type"],
+                              "name": service["data"]["name"],
                               "node": host,
                               "state": "down",
                               "checked": str(datetime.now())
                              }
 
                 p_status.append(status)
-                log.error("Unable to get plugin status. Reason: %s" % error)
+                log.error("Unable to get service status. Reason: %s" % error)
 
     if p_status:
         return sorted(p_status, key=lambda plug: plug['type'])

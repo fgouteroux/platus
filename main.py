@@ -18,7 +18,7 @@ application = Flask(__name__,\
 application.register_blueprint(web)
 application.register_blueprint(api)
 
-application.config['plugins'] = "plugins.yaml"
+application.config['services'] = "services.yaml"
 application.config['users'] = "users.yaml"
 
 # Scss
