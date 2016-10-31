@@ -21,6 +21,18 @@ application.register_blueprint(api)
 application.config['services'] = "services.yaml"
 application.config['users'] = "users.yaml"
 
+application.config['persistent_data'] = True
+application.config['persistent_data_backend'] = {"type": "redis",
+                                                 "data": {"host":"127.0.0.1"}
+                                                }
+
+application.config['notify'] = True
+application.config['notify_backend'] = {"type": "slack",
+                                        "data": {
+                                            "url": ""
+                                            }
+                                       }
+
 # Scss
 assets = Environment(application)
 assets.versions = 'timestamp'

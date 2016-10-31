@@ -16,12 +16,13 @@ from datetime import datetime
 
 # Import third party libs
 from flask import current_app as app
+from deepdiff import DeepDiff
 
 def services_status(roles):
     """Check services health"""
 
     log = app.logger
-    p_status = []
+    services_states = []
 
     try:
         with open(app.config['services'], 'r') as content:
@@ -49,9 +50,9 @@ def services_status(roles):
 
                 if isinstance(status, list):
                     for i in status:
-                        p_status.append(i)
+                        services_states.append(i)
                 else:
-                    p_status.append(status)
+                    services_states.append(status)
 
             except RuntimeError, error:
                 host = service["properties"]['host']
@@ -71,10 +72,54 @@ def services_status(roles):
                               "checked": str(datetime.now())
                              }
 
-                p_status.append(status)
+                services_states.append(status)
                 log.error("Unable to get service status. Reason: %s" % error)
 
-    if p_status:
-        return sorted(p_status, key=lambda plug: plug['type'])
+    if services_states:
+        if app.config['notify']:
+
+            if app.config['persistent_data'] and app.config['persistent_data_backend']:
+
+                storage_backend = app.config['persistent_data_backend']["type"]
+                log.debug("Try importing persistent data backend %s" % storage_backend)
+                call_storage_bd = importlib.import_module("platus.storage.{0}_backend"\
+                                                          .format(storage_backend))
+
+                client = call_storage_bd.login(**app.config['persistent_data_backend']['data'])
+
+                last_service_states = []
+                for service in services_states:
+
+                    last_service = call_storage_bd.get_service_status(client, service["name"])
+                    call_storage_bd.set_service_status(client, service)
+
+                    last_service_states.append(last_service)
+
+                diff = DeepDiff(last_service_states, services_states, ignore_order=True)
+                new_states = diff.get("iterable_item_added")
+                old_states = diff.get("iterable_item_removed")
+
+                if new_states is not None and old_states is not None:
+                    report_changes = []
+                    for k, v in six.iteritems(new_states):
+                        if v["state"] != old_states[k]["state"]:
+                            changed = "{0} state changed to {1} before it was {2}"\
+                                      .format(v["name"],
+                                              v["state"],
+                                              old_states[k]["state"])
+                            log.debug(changed)
+                            report_changes.append(changed)
+
+                    if report_changes:
+                        log.debug("Some services status changed.")
+                        log.debug(report_changes)
+                        notify_backend = app.config['notify_backend']["type"]
+                        log.debug("Try importing notify backend %s" % notify_backend)
+                        call_notify_bd = importlib.import_module("platus.notifier.{0}_backend"\
+                                                                  .format(notify_backend))
+
+                        call_notify_bd.send(app.config['notify_backend']['data'], report_changes)
+
+        return sorted(services_states, key=lambda plug: plug['type'])
     else:
         return ["No data"]

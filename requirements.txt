@@ -8,3 +8,6 @@ pyyaml
 celery
 pymongo
 requests
+redis
+gunicorn
+deepdiff
