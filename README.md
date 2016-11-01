@@ -53,7 +53,7 @@ Response:
 
 **Platus Users**
 
-Manage users and roles in **users.yaml** (default path in main.py).
+Manage users and roles in **users.yaml** (default path in app.py).
 
 Use **roles** to grant permissions to get services status defined in **services.yaml**
 
@@ -78,7 +78,7 @@ user2:
 
 **Platus services**
 
-Create **services.yaml** (default path in main.py).
+Create **services.yaml** (default path in app.py).
 
     application.config['services'] = "services.yaml"
 
@@ -272,8 +272,14 @@ celery:
 
 ## How to test
 
+With docker:
+
+    docker-compose up --build
+
+Or:
+
     pip install -r requirements.txt
-    python main.py
+    python app.py
 
 
 ## More plugins

@@ -10,4 +10,5 @@ pymongo
 requests
 redis
 gunicorn
+eventlet
 deepdiff

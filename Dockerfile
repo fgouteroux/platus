@@ -14,4 +14,4 @@ USER platus
 
 COPY . .
 
-CMD gunicorn -b 0.0.0.0:5001 main:application
+CMD gunicorn -c "platus/config/gunicorn.py" app:application --reload
