@@ -17,18 +17,51 @@ from datetime import datetime
 # Import third party libs
 from flask import current_app as app
 
+def notify(services_states):
+    """Notify services health"""
+    storage_backend = app.config['persistent_data_backend']["type"]
+    app.logger.debug("Try importing persistent data backend %s" % storage_backend)
+    call_storage_bd = importlib.import_module("platus.storage.{0}_backend"\
+                                              .format(storage_backend))
+
+    client = call_storage_bd.login(**app.config['persistent_data_backend']['data'])
+
+    report_changes = []
+
+    for service in services_states:
+
+        last_service = call_storage_bd.get_service_status(client, service["name"])
+        call_storage_bd.set_service_status(client, service)
+
+        if service["state"] != last_service["state"]:
+            changed = "{0} state changed to {1} before it was {2}"\
+                          .format(service["name"],
+                                  service["state"],
+                                  last_service["state"])
+
+            app.logger.debug(changed)
+            report_changes.append(changed)
+
+    if report_changes:
+        app.logger.debug("Some services status changed.")
+        app.logger.debug(report_changes)
+        notify_backend = app.config['notify_backend']["type"]
+        app.logger.debug("Try importing notify backend %s" % notify_backend)
+        call_notify_bd = importlib.import_module("platus.notifier.{0}_backend"\
+                                                  .format(notify_backend))
+
+        call_notify_bd.send(app.config['notify_backend']['data'], report_changes)
+
 def services_status(roles):
     """Check services health"""
-
-    log = app.logger
-    p_status = []
+    services_states = []
 
     try:
         with open(app.config['services'], 'r') as content:
             get_services = yaml.load(content)
     except IOError:
         message = "Config file not found for services"
-        log.error(message)
+        app.logger.error(message)
         return [message]
 
     for name, service in six.iteritems(get_services):
@@ -37,21 +70,21 @@ def services_status(roles):
             plugin = service["type"]
 
             try:
-                log.debug("Read service %s" % name)
-                log.debug("Try importing plugin %s" % plugin)
+                app.logger.debug("Read service %s" % name)
+                app.logger.debug("Try importing plugin %s" % plugin)
                 call_service = importlib.import_module("platus.plugins.{0}"\
                                                       .format(plugin))
 
                 client = call_service.login(**service["properties"])
                 status = call_service.check_health(client, service["data"])
 
-                log.debug("service status: %s" % status)
+                app.logger.debug("service status: %s" % status)
 
                 if isinstance(status, list):
                     for i in status:
-                        p_status.append(i)
+                        services_states.append(i)
                 else:
-                    p_status.append(status)
+                    services_states.append(status)
 
             except RuntimeError, error:
                 host = service["properties"]['host']
@@ -71,10 +104,15 @@ def services_status(roles):
                               "checked": str(datetime.now())
                              }
 
-                p_status.append(status)
-                log.error("Unable to get service status. Reason: %s" % error)
+                services_states.append(status)
+                app.logger.error("Unable to get service status. Reason: %s" % error)
 
-    if p_status:
-        return sorted(p_status, key=lambda plug: plug['type'])
+    if services_states:
+
+        if app.config['notify'] and app.config['persistent_data']\
+        and app.config['persistent_data_backend']:
+            notify(services_states)
+
+        return sorted(services_states, key=lambda plug: plug['type'])
     else:
         return ["No data"]

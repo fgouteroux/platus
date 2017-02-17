@@ -4,12 +4,12 @@ from __future__ import absolute_import
 from flask import Flask
 from flask_assets import Environment, Bundle
 
-# change it
+import logging
+from logging.handlers import RotatingFileHandler
+
 from platus.web import web
 from platus.api import api
 
-import logging
-from logging.handlers import RotatingFileHandler
 
 application = Flask(__name__,\
                     static_folder="platus/static/",\
@@ -20,6 +20,18 @@ application.register_blueprint(api)
 
 application.config['services'] = "services.yaml"
 application.config['users'] = "users.yaml"
+
+application.config['persistent_data'] = True
+application.config['persistent_data_backend'] = {"type": "redis",
+                                                 "data": {"host":"redis"}
+                                                }
+
+application.config['notify'] = True
+application.config['notify_backend'] = {"type": "slack",
+                                        "data": {
+                                            "url": ""
+                                            }
+                                       }
 
 # Scss
 assets = Environment(application)
@@ -56,12 +68,5 @@ log.addHandler(rotatingfile_handler)
 log.setLevel(logging.DEBUG)
 
 
-
-def run():
-    # Start Application
-    log.info("start application")
-    application.run(host="0.0.0.0", debug=False, port=5001, threaded=True)
-
-
 if __name__ == '__main__':
-    run()
+    application.run(host="0.0.0.0", debug=True, port=5001)
