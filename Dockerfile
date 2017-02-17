@@ -12,6 +12,4 @@ RUN pip install -r requirements.txt
 
 USER platus
 
-COPY . .
-
 CMD gunicorn -c "platus/config/gunicorn.py" app:application --reload
