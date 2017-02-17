@@ -127,6 +127,17 @@ Platus support multiple notifications backend:
                                                 "url": "http://slack-web-hook-url"
                                                 }
                                            }
+### Email
+
+    application.config['notify_backend'] = {"type": "email",
+                                            "data": {
+                                                "fr": "",
+                                                "to": "",
+                                                "host": "",
+                                                "username": "",
+                                                "password": ""
+                                                }
+                                            }
 
 ## Platus storage
 
