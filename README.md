@@ -118,7 +118,7 @@ Send a notification if a service status changed. Enable it in app.py:
 
 Platus support multiple notifications backend:
 - slack
-- email (coming soon)
+- email
 
 ### Slack
 

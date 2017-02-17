@@ -32,6 +32,15 @@ application.config['notify_backend'] = {"type": "slack",
                                             "url": ""
                                             }
                                        }
+#application.config['notify_backend'] = {"type": "email",
+#                                        "data": {
+#                                            "fr": "",
+#                                            "to": "",
+#                                            "host": "",
+#                                            "username": "",
+#                                            "password": ""
+#                                            }
+#                                        }
 
 # Scss
 assets = Environment(application)
