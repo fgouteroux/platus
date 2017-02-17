@@ -130,7 +130,10 @@ def check_health(client, data):
     Usage:
         >>> check_health(client, data)
     """
-    url = client.base_url + data["url"]
+    if data.get("url") is not None:
+        url = client.base_url + data["url"]
+    else:
+        url = client.base_url
 
     try:
         response = client.conn.get(url)
