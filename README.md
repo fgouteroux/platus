@@ -108,6 +108,42 @@ resource02:
         name: myapp02
 ```
 
+## Platus notifications
+
+Send a notification if a service status changed. Enable it in app.py:
+
+    application.config['notify'] = True
+
+**Need storage feature enabled.**
+
+Platus support multiple notifications backend:
+- slack
+- email (coming soon)
+
+### Slack
+
+    application.config['notify_backend'] = {"type": "slack",
+                                            "data": {
+                                                "url": "http://slack-web-hook-url"
+                                                }
+                                           }
+
+## Platus storage
+
+Store services status in a storage backend. Enable it in app.py:
+
+    application.config['persistent_data'] = True
+
+Platus support multiple storage backend:
+- redis
+- mongodb (coming soon)
+
+### Redis
+
+    application.config['persistent_data_backend'] = {"type": "redis",
+                                                     "data": {"host":"redis"}
+                                                    }
+
 ## Plugins Usage
 
 ### rest_http plugin
