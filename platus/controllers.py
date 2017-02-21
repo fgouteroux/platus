@@ -36,22 +36,35 @@ def notify(services_states):
 
         if last_service:
 
-            service["last_state"] = last_service["state"]
-            changed = "{0} state changed to {1} before it was {2}"\
-                      .format(service["name"],
-                              service["state"],
-                              service["last_state"])
+            if service["state"] != last_service["state"] and service["state"] == "operational":
+                # Reset counter and last state
+                service["retries"] = 0
+                service["last_state"] = "operational"
+                changed = "{0} state changed to {1} before it was {2}"\
+                          .format(service["name"],
+                                  service["state"],
+                                  last_service["state"])
 
-            if service["state"] != service["last_state"] and service["state"] == "operational":
-                service["retries"] = 0
                 report_changes.append(changed)
-            elif service["state"] == service["last_state"] and service["state"] == "operational":
+
+            elif service["state"] == last_service["state"] and service["state"] == "operational":
+                # Reset counter and last state
                 service["retries"] = 0
+                service["last_state"] = "operational"
             else:
+                service["last_state"] = last_service["last_state"]
+                changed = "{0} state changed to {1} before it was {2}"\
+                          .format(service["name"],
+                                  service["state"],
+                                  service["last_state"])
                 service["retries"] = int(last_service.get("retries", 0)) + 1
 
                 if service["retries"] == retry_limit:
                     report_changes.append(changed)
+
+        # Get values or init if not found
+        service["retries"] = service.get("retries", 0)
+        service["last_state"] = service.get("last_state", service["state"])
 
         # Update service status
         call_storage_bd.set_service_status(client, service)
