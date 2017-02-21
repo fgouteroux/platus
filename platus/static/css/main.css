@@ -23,6 +23,11 @@
 	line-height: 35px;
 }
 
+.navbar-right{
+	padding-right: 30px;
+	padding-top: 15px;
+}
+
 .nav > li > a:hover{
 	background-color: transparent;
 }
@@ -43,4 +48,17 @@
 
 .footer-container > a:hover{
 	color: #337ab7;
+}
+
+.dropdown-toggle {
+	color: #fff;
+}
+
+a:focus, a:hover{
+	color: #f9ef6a;
+	background-color: transparent;
+}
+
+.nav .open>a, .nav .open>a:focus, .nav .open>a:hover {
+	background-color: transparent;
 }
