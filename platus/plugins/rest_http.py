@@ -140,7 +140,7 @@ def check_health(client, data):
         status = None
 
         app.logger.debug("rest_http - status code: {0} => {1}"\
-                  .format(response.status_code, response.text))
+                  .format(response.status_code, response.content))
 
         if response.status_code == 200:
             status = {"type": data["type"],
@@ -152,7 +152,7 @@ def check_health(client, data):
                      }
             if data.get("search"):
                 search = data["search"]
-                if isinstance(search, str) and search not in response.text:
+                if isinstance(search, str) and search not in response.content:
                     status["state"] = "unhealthy"
                 elif isinstance(search, dict):
                     result = response.json()
