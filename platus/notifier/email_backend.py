@@ -36,7 +36,7 @@ def send(notifier, data):
     msg['To'] = notifier["to"]
     msg['From'] = email.utils.formataddr(('Platus', notifier["fr"]))
 
-    msg['Subject'] = "Services status changed"
+    msg['Subject'] = notifier["subject"]
 
     server = smtplib.SMTP(notifier["host"])
     try:

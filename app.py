@@ -38,7 +38,8 @@ application.config['notify_backend'] = {"type": "slack",
 #                                            "to": "",
 #                                            "host": "",
 #                                            "username": "",
-#                                            "password": ""
+#                                            "password": "",
+#                                            "subject": "Services status changed"
 #                                            }
 #                                        }
 

@@ -143,7 +143,8 @@ Platus support multiple notifications backend:
                                                 "to": "",
                                                 "host": "",
                                                 "username": "",
-                                                "password": ""
+                                                "password": "",
+                                                "subject": "Services status changed"
                                                 }
                                             }
 
