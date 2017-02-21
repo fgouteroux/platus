@@ -114,6 +114,14 @@ Send a notification if a service status changed. Enable it in app.py:
 
     application.config['notify'] = True
 
+When a service state is down or unhealthy, platus will check 3 times before sending a notification to avoid having too many notifications.
+
+![platus](screenshots/platus_retries.png)
+
+This setting could be overriden in app.py:
+
+    application.config['retries_before_notify'] = 2
+
 **Need storage feature enabled.**
 
 Platus support multiple notifications backend:

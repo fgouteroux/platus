@@ -27,20 +27,34 @@ def notify(services_states):
     client = call_storage_bd.login(**app.config['persistent_data_backend']['data'])
 
     report_changes = []
+    retry_limit = app.config.get('retries_before_notify', 3)
 
     for service in services_states:
 
         last_service = call_storage_bd.get_service_status(client, service["name"])
-        call_storage_bd.set_service_status(client, service)
+        app.logger.debug(last_service)
 
-        if service["state"] != last_service["state"]:
+        if last_service:
+
+            service["last_state"] = last_service["state"]
             changed = "{0} state changed to {1} before it was {2}"\
-                          .format(service["name"],
-                                  service["state"],
-                                  last_service["state"])
+                      .format(service["name"],
+                              service["state"],
+                              service["last_state"])
 
-            app.logger.debug(changed)
-            report_changes.append(changed)
+            if service["state"] != service["last_state"] and service["state"] == "operational":
+                service["retries"] = 0
+                report_changes.append(changed)
+            elif service["state"] == service["last_state"] and service["state"] == "operational":
+                service["retries"] = 0
+            else:
+                service["retries"] = int(last_service.get("retries", 0)) + 1
+
+                if service["retries"] == retry_limit:
+                    report_changes.append(changed)
+
+        # Update service status
+        call_storage_bd.set_service_status(client, service)
 
     if report_changes:
         app.logger.debug("Some services status changed.")
@@ -86,7 +100,7 @@ def services_status(roles):
                 else:
                     services_states.append(status)
 
-            except RuntimeError, error:
+            except RuntimeError as error:
                 host = service["properties"]['host']
                 if isinstance(host, list):
                     for item in host:
@@ -94,14 +108,16 @@ def services_status(roles):
                                   "name": service["data"]["name"],
                                   "node": item,
                                   "state": "down",
-                                  "checked": str(datetime.now())
+                                  "checked": str(datetime.now()),
+                                  "retries": service.get("retries", 0)
                                  }
                 else:
                     status = {"type": service["data"]["type"],
                               "name": service["data"]["name"],
                               "node": host,
                               "state": "down",
-                              "checked": str(datetime.now())
+                              "checked": str(datetime.now()),
+                              "retries": service.get("retries", 0)
                              }
 
                 services_states.append(status)

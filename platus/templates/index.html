@@ -15,16 +15,33 @@
                 <th>Status</th>
                 <th>Checked At</th>
                 <th>Elapsed Time</th>
+                <th>Retries</th>
             </thead>
             <tbody>
-           {% for plugin in plugins %}
+           {% for service in services %}
                 <tr>
-                    <td>{{ plugin.type | default("n/a")}}</td>
-                    <td>{{ plugin.name | default("n/a")}}</td>
-                    <td>{{ plugin.node | default("n/a")}}</td>
-                    <td {% if plugin.state == "operational" %} class="btn btn-success" {% else %} class="btn btn-danger"{% endif %}>{{ plugin.state | default("n/a")}}</td>
-                    <td>{{ plugin.checked | default("n/a")}}</td>
-                    <td>{{ plugin.elapsed | default("n/a") }}</td>
+                    <td>{{ service.type | default("n/a")}}</td>
+                    <td>{{ service.name | default("n/a")}}</td>
+                    <td>{{ service.node | default("n/a")}}</td>
+                    <td {% if service.state == "operational" %}
+                            class="btn btn-success"
+                        {% else %}
+                            class="btn btn-danger"
+                        {% endif %}
+                        >{{ service.state | default("n/a")}}
+                    </td>
+                    <td>{{ service.checked | default("n/a")}}</td>
+                    <td>{{ service.elapsed | default("n/a") }}</td>
+                    <td>{% if service.retries is defined %}
+                            {% if service.retries|int <= config.retries_before_notify %}
+                                {{ service.retries }}/{{ config.retries_before_notify }}
+                            {% else %}
+                                {{ config.retries_before_notify }}/{{ config.retries_before_notify }} ({{ service.retries }})
+                            {% endif %}
+                        {% else %}
+                            n/a
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
             </tbody>

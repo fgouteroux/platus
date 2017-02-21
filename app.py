@@ -25,7 +25,7 @@ application.config['persistent_data'] = True
 application.config['persistent_data_backend'] = {"type": "redis",
                                                  "data": {"host":"redis"}
                                                 }
-
+application.config['retries_before_notify'] = 3
 application.config['notify'] = True
 application.config['notify_backend'] = {"type": "slack",
                                         "data": {
