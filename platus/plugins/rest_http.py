@@ -8,6 +8,7 @@ rest http plugin
 __author__ = "François Gouteroux <francois.gouteroux@gmail.com>"
 
 # Import Python libs
+import re
 import atexit
 import tempfile
 from datetime import datetime
@@ -152,8 +153,10 @@ def check_health(client, data):
                      }
             if data.get("search"):
                 search = data["search"]
-                if isinstance(search, str) and search not in response.content:
-                    status["state"] = "unhealthy"
+                if isinstance(search, str):
+                    found = re.search(search, response.content)
+                    if not found:
+                        status["state"] = "unhealthy"
                 elif isinstance(search, dict):
                     result = response.json()
                     if not search.viewitems() <= result.viewitems():

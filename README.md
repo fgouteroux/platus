@@ -201,6 +201,24 @@ gitlab:
         search: success
 ```
 
+To perform an advanced check **with a regex**:
+
+*Example: Search for an address email*
+
+```yaml
+gitlab:
+    type: rest_http
+    properties:
+        host: about.gitlab.com
+        port: 443
+        protocol: http
+    data:
+        type: Git
+        name: gitlab
+        url: /contact/
+        search: (\w+[.|\w])*@(\w+[.])*\w+
+```
+
 To perform an advanced check and **search for a dict** in response:
 If **"search" dict** is not in **response dict**, resource state become **unhealthy**
 
@@ -389,10 +407,7 @@ The **check_health** function must return a **dict** or a **list of dict** with 
 - checked
 
 ## Todo
-- Notification system (email, slack...)
-- Storage backend to store services status
 - Secure sensitive infos in services.yaml
-- rest_http search improvements, regex...
 - Unit tests
 
 ## How to contribute
