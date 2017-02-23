@@ -17,6 +17,19 @@ from datetime import datetime
 # Import third party libs
 from flask import current_app as app
 
+def get_vault_secret(vault_client, vault_call, properties):
+    """search and get vault secret"""
+    for key in properties.keys():
+        if key.startswith("vault_"):
+            value = vault_call.read_vault_secret(\
+                        vault_client,
+                        properties[key])
+
+            unvault_key = key.split("vault_")[1]
+            properties[unvault_key] = value
+            properties.pop(key)
+
+
 def notify(services_states):
     """Notify services health"""
     storage_backend = app.config['persistent_data_backend']["type"]
@@ -91,6 +104,11 @@ def services_status(roles):
         app.logger.error(message)
         return [message]
 
+    vault = app.config.get("vault", False)
+    if vault:
+        vault_call = importlib.import_module("platus.vault")
+        vault_client = vault_call.login(**app.config["vault_backend"])
+
     for name, service in six.iteritems(get_services):
 
         if "admin" in roles or (set(roles) & set(service["role"])):
@@ -101,6 +119,9 @@ def services_status(roles):
                 app.logger.debug("Try importing plugin %s" % plugin)
                 call_service = importlib.import_module("platus.plugins.{0}"\
                                                       .format(plugin))
+
+                if vault:
+                    get_vault_secret(vault_client, vault_call, service["properties"])
 
                 client = call_service.login(**service["properties"])
                 status = call_service.check_health(client, service["data"])

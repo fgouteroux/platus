@@ -43,6 +43,14 @@ application.config['notify_backend'] = {"type": "slack",
 #                                            }
 #                                        }
 
+application.config['vault'] = False
+application.config['vault_backend'] = {"host": "vault",
+                                       "port": 8200,
+                                       "protocol": "http",
+                                       "token": "",
+                                       "path": "/v1/secret/"}
+
+
 # Scss
 assets = Environment(application)
 assets.versions = 'timestamp'

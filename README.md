@@ -164,6 +164,82 @@ Platus support multiple storage backend:
                                                      "data": {"host":"redis"}
                                                     }
 
+## Vault support
+
+Store services secret in [vault](https://www.vaultproject.io/) and let's platus ask the secret when necessary.
+
+**How it works:**
+
+- Platus ask to vault **the secret** corresponding to the key
+- Vault respond with the **decrypted secret**
+- Platus use **this secret** to check the service status
+
+Enable it in **app.py**:
+
+    application.config['vault'] = True
+    application.config['vault_backend'] = {"host": "vault",
+                                           "port": 8200,
+                                           "protocol": "http",
+                                           "token": "the-root-token",
+                                           "path": "/v1/secret/"}
+
+To use vault secrets, prepend each service property desired with "**vault_**"
+
+*Example:*
+
+```yaml
+resource01:
+    type: rest_http
+    properties:
+        host: resource1.lan
+        port: 80
+        protocol: http
+        vault_username: resource01_username
+        vault_password: resource01_password
+```
+---
+**How to test**
+
+1/ Add vault container in **docker-compose.yml**:
+
+```yaml
+  vault:
+    image: vault
+    ports:
+      - "8200:8200"
+    volumes:
+      - /tmp/vault:/home/vault:Z
+    cap_add:
+      - IPC_LOCK
+```
+
+2/ Get the **vault root token**:
+- from container log
+- from volume shared in **/tmp/vault/.vault-token**
+
+3/ Update the vault config in **app.py**
+
+**Note:**
+
+Use the python script to write severals vault secrets in one time:
+
+- write vault secrets in **vaults_secrets.yml**
+- update **write_vault_secrets.py** with **vault credentials**
+
+```python
+    client = login(
+                host="localhost",
+                port=8200,
+                protocol="http",
+                token="b4169582-e3d1-b752-64e7-d3ad453a67eb",
+                path="/v1/secret/")
+```
+
+- write the secrets in vault
+```
+    python write_vault_secrets.py
+```
+
 ## Plugins Usage
 
 ### rest_http plugin
@@ -407,7 +483,6 @@ The **check_health** function must return a **dict** or a **list of dict** with 
 - checked
 
 ## Todo
-- Secure sensitive infos in services.yaml
 - Unit tests
 
 ## How to contribute
