@@ -40,6 +40,8 @@
                         </td>
                     <td {% if service.state == "operational" %}
                             class="success"
+                        {% elif service.state == "unhealthy" %}
+                            class="warning"
                         {% elif service.state == "down" %}
                             class="danger"
                         {% else %}

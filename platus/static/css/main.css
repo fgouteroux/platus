@@ -70,6 +70,13 @@ a:focus, a:hover{
     background-color: #5cb85c;
 }
 
+.table tbody tr > td.warning {
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #F0AD4E;
+}
+
 .table tbody tr > td.danger {
     color: #fff;
     text-align: center;
