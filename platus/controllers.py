@@ -17,7 +17,15 @@ from datetime import datetime
 # Import third party libs
 from flask import current_app as app
 
-def get_vault_secret(vault_client, vault_call, properties):
+def _get_storage_module():
+    """Return storage client"""
+    storage_backend = app.config['persistent_data_backend']["type"]
+    app.logger.debug("Try importing persistent data backend %s" % storage_backend)
+    return importlib.import_module("platus.storage.{0}_backend"\
+                                              .format(storage_backend))
+
+
+def _get_vault_secret(vault_client, vault_call, properties):
     """search and get vault secret"""
     for key in properties.keys():
         if key.startswith("vault_"):
@@ -30,20 +38,15 @@ def get_vault_secret(vault_client, vault_call, properties):
             properties.pop(key)
 
 
-def notify(services_states):
+def _notify(services_states):
     """Notify services health"""
-    storage_backend = app.config['persistent_data_backend']["type"]
-    app.logger.debug("Try importing persistent data backend %s" % storage_backend)
-    call_storage_bd = importlib.import_module("platus.storage.{0}_backend"\
-                                              .format(storage_backend))
-
+    call_storage_bd = _get_storage_module()
     client = call_storage_bd.login(**app.config['persistent_data_backend']['data'])
 
     report_changes = []
     retry_limit = app.config.get('retries_before_notify', 3)
 
     for service in services_states:
-
         last_service = call_storage_bd.get_service_status(client, service["name"])
         app.logger.debug(last_service)
 
@@ -121,7 +124,7 @@ def services_status(roles):
                                                       .format(plugin))
 
                 if vault:
-                    get_vault_secret(vault_client, vault_call, service["properties"])
+                    _get_vault_secret(vault_client, vault_call, service["properties"])
 
                 client = call_service.login(**service["properties"])
                 status = call_service.check_health(client, service["data"])
@@ -161,8 +164,15 @@ def services_status(roles):
 
         if app.config['notify'] and app.config['persistent_data']\
         and app.config['persistent_data_backend']:
-            notify(services_states)
+            _notify(services_states)
 
         return sorted(services_states, key=lambda plug: plug['type'])
     else:
         return ["No data"]
+
+def flush_data():
+    """Flush services status data"""
+    if app.config['persistent_data'] and app.config['persistent_data_backend']:
+        storage_backend = _get_storage_module()
+        client = storage_backend.login(**app.config['persistent_data_backend']['data'])
+        return storage_backend.flush(client)

@@ -1,35 +1,35 @@
 .navbar-fixed-top{
-	background-color: #224466;
-	color: #fff;
+    background-color: #224466;
+    color: #fff;
 }
 
 .navbar-fixed-bottom{
-	background-color: #224466;
-	color: #fff;
-	padding-top: 15px;
-	padding-bottom: 5px;
+    background-color: #224466;
+    color: #fff;
+    padding-top: 15px;
+    padding-bottom: 5px;
 }
 
 .navbar-brand{
-	color: #fff;
+    color: #fff;
 }
 
 .navbar-brand:hover{
-	color: #fff;
+    color: #fff;
 }
 
 .nav > li > a{
-	color: #fff;
-	line-height: 35px;
+    color: #fff;
+    line-height: 35px;
 }
 
 .navbar-right{
-	padding-right: 30px;
-	padding-top: 15px;
+    padding-right: 30px;
+    padding-top: 15px;
 }
 
 .nav > li > a:hover{
-	background-color: transparent;
+    background-color: transparent;
 }
 
 .navbar-nav > li > a {
@@ -38,27 +38,48 @@
 }
 
 .container {
-	padding-top: 4%;
-	padding-bottom: 4%;
+    padding-top: 4%;
+    padding-bottom: 4%;
 }
 
 .footer-container{
-	text-align: center;
+    text-align: center;
 }
 
 .footer-container > a:hover{
-	color: #337ab7;
+    color: #337ab7;
 }
 
 .dropdown-toggle {
-	color: #fff;
+    color: #fff;
 }
 
 a:focus, a:hover{
-	color: #f9ef6a;
-	background-color: transparent;
+    color: #f9ef6a;
+    background-color: transparent;
 }
 
 .nav .open>a, .nav .open>a:focus, .nav .open>a:hover {
-	background-color: transparent;
+    background-color: transparent;
+}
+
+.table tbody tr > td.success {
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #5cb85c;
+}
+
+.table tbody tr > td.danger {
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #d9534f;
+}
+
+.table tbody tr > td.unknown {
+    color: #fff;
+    text-align: center;
+    border-radius: 5px;
+    background-color: #adadad;
 }

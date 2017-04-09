@@ -29,3 +29,18 @@ def status():
     except:
         raise
         return jsonify({'result': 'none'}), 401
+
+
+@api.route('/flush_status', methods=['POST'])
+@auth.login_required
+def flush_status():
+    try:
+        if request.method == "POST":
+            current_user = auth.username()
+            roles = get_roles(current_user)
+
+            if "admin" in roles:
+                return jsonify({'result': controllers.flush_data()}), 200
+    except:
+        raise
+        return jsonify({'result': 'none'}), 401

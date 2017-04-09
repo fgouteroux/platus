@@ -53,3 +53,23 @@ def get_service_status(client, service_name):
     data = client.hgetall(service_name)
     app.logger.debug("redis - get {0}: {1}".format(service_name, data))
     return data
+
+
+def flush(client):
+    """flush db
+
+    Args:
+        client (Client): client connection object
+
+    Returns:
+        bool: True if success.
+
+    Raises:
+        n/a: This function didn't raise.
+
+    Usage:
+        >>> flushdb(client)
+    """
+    result = client.flushdb()
+    app.logger.debug("redis - flush db: {0}".format(result))
+    return result

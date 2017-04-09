@@ -31,3 +31,19 @@ def index():
     except:
         raise
         return jsonify({'result': 'none'}), 401
+
+@web.route('/settings', methods=['GET'])
+@auth.login_required
+def settings():
+    try:
+        if request.method == "GET":
+            current_user = auth.username()
+            roles = get_roles(current_user)
+
+            return render_template(
+                'settings.html',
+                config=app.config,
+                current_user=current_user)
+    except:
+        raise
+        return jsonify({'result': 'none'}), 401

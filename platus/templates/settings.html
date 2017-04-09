@@ -1,0 +1,51 @@
+{% include 'header.html' %}
+{% block content %}
+
+    <nav class="navbar navbar-header navbar-fixed-top">
+        <a class="navbar-brand" href="/">Platform Status</a>
+        <div class="nav navbar-nav navbar-right">
+            <div class="dropdown">
+                <a><span><i class="glyphicon glyphicon-user"></i> {{ current_user }}</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">  
+        <h3> Platus Settings</h3>
+        <table class="table small-text">
+            <tbody>
+                {% if config.notify|string == "True" %}
+                    <tr>
+                    <td><i class="glyphicon glyphicon-bullhorn"></i> {{ config.notify_backend.type }}</td>
+                    <td>
+                        <table class="table small-text table-striped">
+                            {% for key, value in config.notify_backend.data.iteritems() %}
+                                <tr>
+                                    <td>{{ key }}:</td><td>{{ value }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    </tr>
+                {% endif %}
+                {% if config.persistent_data|string == "True" %}
+                    <tr>
+                    <td><i class="glyphicon glyphicon-hdd"></i> {{ config.persistent_data_backend.type }}</td>
+                    <td>
+                        <table class="table small-text table-striped">
+                            {% for key, value in config.persistent_data_backend.data.iteritems() %}
+                                <tr>
+                                    <td>{{ key }}:</td><td>{{ value }}</td>
+                                </tr>
+                            {% endfor %}
+                        </table>
+                    </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <a class="btn btn-primary" href="javascript:history.go(-1)" role="button">Return</a>
+        <button id="btnflushdata" class="btn btn-warning" type="submit">Flush all services status</button>
+    </div>
+{% endblock %}
+{% include 'footer.html' %}
