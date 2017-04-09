@@ -87,36 +87,45 @@ def check_health(client, data):
     Usage:
         >>> check_health(client, data)
     """
-    start_time = time.time()
-    workers_state = client.control.inspect().ping()
-    elapsed_time = timedelta(seconds=(time.time() - start_time))
+    try:
+        start_time = time.time()
+        workers_state = client.control.inspect().ping()
+        elapsed_time = timedelta(seconds=(time.time() - start_time))
 
-    app.logger.debug("celery_worker - response: {0}".format(workers_state))
+        app.logger.debug("celery_worker - response: {0}".format(workers_state))
 
-    workers = []
-    for worker, result in six.iteritems(workers_state):
+        workers = []
+        for worker, result in six.iteritems(workers_state):
 
-        state = result['ok']
+            state = result['ok']
 
-        if state == "pong":
-            status = {"type": data["type"],
-                      "name": data["name"],
-                      "node": worker,
-                      "state": "operational",
-                      "checked": str(datetime.now()),
-                      "elapsed": str(elapsed_time)
-                     }
-        else:
-            status = {"type": data["type"],
-                      "name": data["name"],
-                      "node": worker,
-                      "state": "down",
-                      "checked": str(datetime.now()),
-                      "elapsed": str(elapsed_time)
-                     }
-        workers.append(status)
+            if state == "pong":
+                status = {"type": data["type"],
+                          "name": data["name"],
+                          "node": worker,
+                          "state": "operational",
+                          "checked": str(datetime.now()),
+                          "elapsed": str(elapsed_time)
+                         }
+            else:
+                status = {"type": data["type"],
+                          "name": data["name"],
+                          "node": worker,
+                          "state": "down",
+                          "checked": str(datetime.now()),
+                          "elapsed": str(elapsed_time)
+                         }
+            workers.append(status)
 
-    if workers:
-        return workers
-    else:
-        raise RuntimeError("Unable to get celery workers status.")
+        if workers:
+            return workers
+
+    except Exception as error_msg:
+        app.logger.error("celery_worker - {0} => {1}".format(data["name"], error_msg))
+
+        return {"type": data["type"],
+                "name": data["name"],
+                "node": client.host,
+                "state": "unknown",
+                "checked": str(datetime.now())
+               }

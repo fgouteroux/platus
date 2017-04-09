@@ -39,6 +39,7 @@ def login(host, protocol="https", port=443, **kwargs):
         password (str): rest http password
         cert (str): rest http certificate
         key (str): rest http keyfile
+        timeout (int): rest http timeout
 
     Returns:
         Client: client connection object
@@ -86,6 +87,11 @@ def login(host, protocol="https", port=443, **kwargs):
     else:
         key_file = None
         cert_file = None
+
+    if "timeout" in kwargs:
+        conn.timeout = kwargs["timeout"]
+    else:
+        conn.timeout = 30
 
     conn.verify = False
 
@@ -179,6 +185,6 @@ def check_health(client, data):
         return {"type": data["type"],
                 "name": data["name"],
                 "node": client.host,
-                "state": "down",
+                "state": "unknown",
                 "checked": str(datetime.now())
                }

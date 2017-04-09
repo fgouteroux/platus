@@ -100,41 +100,50 @@ def check_health(client, data):
     Usage:
         >>> check_health(client, data)
     """
-    start_time = time.time()
+    try:
+        start_time = time.time()
 
-    # The replSetGetStatus command returns the status of the
-    # replica set from the point of view of the current server
-    # https://docs.mongodb.com/manual/reference/command/replSetGetStatus/
-    rs_state = client.admin.command('replSetGetStatus')
-    app.logger.debug("mongodb - response: {0}".format(rs_state))
+        # The replSetGetStatus command returns the status of the
+        # replica set from the point of view of the current server
+        # https://docs.mongodb.com/manual/reference/command/replSetGetStatus/
+        rs_state = client.admin.command('replSetGetStatus')
+        app.logger.debug("mongodb - response: {0}".format(rs_state))
 
-    elapsed_time = timedelta(seconds=(time.time() - start_time))
+        elapsed_time = timedelta(seconds=(time.time() - start_time))
 
-    members_state = []
-    for member in rs_state['members']:
+        members_state = []
+        for member in rs_state['members']:
 
-        health = member['health']
-        node = member['name'].split(':')[0]
+            health = member['health']
+            node = member['name'].split(':')[0]
 
-        if health == 1:
-            status = {"type": data["type"],
-                      "name": data["name"],
-                      "node": node,
-                      "state": "operational",
-                      "checked": str(datetime.now()),
-                      "elapsed": str(elapsed_time)
-                     }
-        elif health == 0:
-            status = {"type": data["type"],
-                      "name": data["name"],
-                      "node": node,
-                      "state": "down",
-                      "checked": str(datetime.now()),
-                      "elapsed": str(elapsed_time)
-                     }
-        members_state.append(status)
+            if health == 1:
+                status = {"type": data["type"],
+                          "name": data["name"],
+                          "node": node,
+                          "state": "operational",
+                          "checked": str(datetime.now()),
+                          "elapsed": str(elapsed_time)
+                         }
+            elif health == 0:
+                status = {"type": data["type"],
+                          "name": data["name"],
+                          "node": node,
+                          "state": "down",
+                          "checked": str(datetime.now()),
+                          "elapsed": str(elapsed_time)
+                         }
+            members_state.append(status)
 
-    if members_state:
-        return members_state
-    else:
-        raise RuntimeError("Unable to get status of mongodb")
+        if members_state:
+            return members_state
+
+    except Exception as error_msg:
+        app.logger.error("mongodb - {0} => {1}".format(data["name"], error_msg))
+
+        return {"type": data["type"],
+                "name": data["name"],
+                "node": client.host,
+                "state": "unknown",
+                "checked": str(datetime.now())
+               }

@@ -11,4 +11,4 @@ requests
 redis
 gunicorn
 eventlet
-deepdiff
+boto3

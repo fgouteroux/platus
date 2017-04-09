@@ -32,11 +32,18 @@
                 <tr>
                     <td>{{ service.type | default("n/a")}}</td>
                     <td>{{ service.name | default("n/a")}}</td>
-                    <td>{{ service.node | default("n/a")}}</td>
-                    <td {% if service.state == "operational" %}
-                            class="btn btn-success"
+                    <td>{% if service.nodename is defined %}
+                            {{ service.nodename }} ({{ service.node | default("n/a")}})
                         {% else %}
-                            class="btn btn-danger"
+                            {{ service.node | default("n/a")}}
+                        {% endif %}
+                        </td>
+                    <td {% if service.state == "operational" %}
+                            class="success"
+                        {% elif service.state == "down" %}
+                            class="danger"
+                        {% else %}
+                            class="unknown"
                         {% endif %}
                         >{{ service.state | default("n/a")}}
                     </td>
