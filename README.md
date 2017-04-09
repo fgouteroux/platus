@@ -8,6 +8,7 @@ Currently supported plugins:
 - rest_http
 - mongodb
 - celery_worker
+- aws_ec2
 
 
 ## Usage
@@ -419,6 +420,64 @@ celery:
         type: Worker
         name: celery_w
 ```
+
+### AWS EC2 plugin
+
+This plugin returns aws ec2 instances state.
+More info: http://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_InstanceState.html
+
+Get all ec2 instances status:
+
+```yaml
+aws:
+    type: aws_ec2
+    properties:
+        region: "eu-central-1"
+        access_key: "myaccesskey"
+        secret_key: "mysecretkey"
+    data:
+        type: Infra
+        name: EC2 Instance
+```
+
+Get specific instances with ids:
+
+```yaml
+aws:
+    type: aws_ec2
+    properties:
+        region: "eu-central-1"
+        access_key: "myaccesskey"
+        secret_key: "mysecretkey"
+    data:
+        type: Infra
+        name: EC2 Instance
+        ec2_instance_ids:
+            - i-xxxxxxxxxdb9ba68f
+            - i-xxxxxxxxxdb8be69b
+```
+
+Get ec2 instances with filter(s):
+
+*Get instance with tag: name=test*
+
+ ```yaml
+aws:
+    type: aws_ec2
+    properties:
+        region: "eu-central-1"
+        access_key: "myaccesskey"
+        secret_key: "mysecretkey"
+    data:
+        type: Infra
+        name: EC2 Instance
+        ec2_filters:
+            - Name: tag:Name
+              Values:
+                  - test
+```
+
+For more examples on filters usage, see http://docs.aws.amazon.com/cli/latest/reference/ec2/describe-instances.html 
 
 ## How to test
 
