@@ -19,7 +19,7 @@ In a browser: *http://localhost:5001*
 
 ![platus](screenshots/platus_ok.png)
 
-![platus](screenshots/platus_nok.png)
+![platus](screenshots/platus_statuses.png)
 
 **Api**
 
