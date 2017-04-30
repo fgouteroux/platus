@@ -1,0 +1,39 @@
+---
+# Global config
+services: data/services.yaml
+users: data/users.yaml
+
+# Storage backend
+persistent_data: True
+persistent_data_backend:
+  type: redis
+  data: 
+    host: redis
+
+# Notifications
+retries_before_notify: 3
+notify: True
+
+notify_backend:
+  type: slack
+  data:
+    url: slack-url
+
+#notify_backend:
+#  type: email
+#  data:
+#    fr: team1@example.org
+#    to: team2@mexamle.org
+#    host: mail.smtp.com
+#    username: user
+#    password: pass
+#    subject: "Services status changed"
+
+# Vault
+vault: False
+vault_backend:
+  host: vault
+  port: 8200
+  protocol: http
+  token: ""
+  path: /v1/secret/

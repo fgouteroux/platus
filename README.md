@@ -75,11 +75,9 @@ Response:
 
 **Users**
 
-Manage users and roles in **users.yaml** (default path in /data).
+Manage users and roles in **users.yaml** (default path in **/data/config.yaml**).
 
 Use **roles** to grant permissions to get services status defined in **services.yaml**
-
-    application.config['users'] = "/data/users.yaml"
 
 
 ```yaml
@@ -102,9 +100,7 @@ user2:
 
 **Services**
 
-Create **services.yaml** (default path in /data).
-
-    application.config['services'] = "/data/services.yaml"
+Create **services.yaml** (default path in **/data/config.yaml**).
 
 ```yaml
 resource01:
@@ -134,16 +130,18 @@ resource02:
 
 ## Notifications
 
-Send a notification if a service status changed. Enable it in app.py:
+Send a notification if a service status changed. Enable it in config.yaml:
 
-    application.config['notify'] = True
-
+```yaml
+    notify: True
+```
 When a service state is down or unhealthy, platus will check 3 times before sending a notification to avoid having too many notifications.
 
+This setting could be overriden in config.yaml:
 
-This setting could be overriden in app.py:
-
-    application.config['retries_before_notify'] = 2
+```yaml
+    retries_before_notify: 2
+```
 
 **Need storage feature enabled.**
 
@@ -153,29 +151,34 @@ Platus support multiple notifications backend:
 
 ### Slack
 
-    application.config['notify_backend'] = {"type": "slack",
-                                            "data": {
-                                                "url": "http://slack-web-hook-url"
-                                                }
-                                           }
+```yaml
+notify_backend:
+  type: slack
+  data:
+    url: slack-hook-url
+```
+
 ### Email
 
-    application.config['notify_backend'] = {"type": "email",
-                                            "data": {
-                                                "fr": "",
-                                                "to": "",
-                                                "host": "",
-                                                "username": "",
-                                                "password": "",
-                                                "subject": "Services status changed"
-                                                }
-                                            }
+```yaml
+  notify_backend:
+    type: email
+      data:
+        fr: team1@example.org
+        to: team2@mexamle.org
+        host: mail.smtp.com
+        username: user
+        password: pass
+        subject: "Services status changed"
+```
 
 ## Backends
 
-Store services status in a storage backend. Enable it in app.py:
+Store services status in a storage backend. Enable it in config.yaml:
 
-    application.config['persistent_data'] = True
+```yaml
+  persistent_data: True
+```
 
 Platus support multiple storage backend:
 - redis
@@ -183,10 +186,12 @@ Platus support multiple storage backend:
 
 ### Redis
 
-    application.config['persistent_data_backend'] = {"type": "redis",
-                                                     "data": {"host":"redis"}
-                                                    }
-
+```yaml
+  persistent_data_backend:
+    type: redis
+    data:
+      host: redis
+```
 ## Vault
 
 Store services secret in [vault](https://www.vaultproject.io/) and let's platus ask the secret when necessary.
@@ -197,14 +202,17 @@ Store services secret in [vault](https://www.vaultproject.io/) and let's platus 
 - Vault respond with the **decrypted secret**
 - Platus use **this secret** to check the service status
 
-Enable it in **app.py**:
+Enable it in **config.yaml**:
 
-    application.config['vault'] = True
-    application.config['vault_backend'] = {"host": "vault",
-                                           "port": 8200,
-                                           "protocol": "http",
-                                           "token": "the-root-token",
-                                           "path": "/v1/secret/"}
+```yaml
+  vault: False
+  vault_backend:
+    host: vault
+    port: 8200
+    protocol: http
+    token: "vault-token"
+    path: /v1/secret/
+```
 
 To use vault secrets, prepend each service property desired with "**vault_**"
 
@@ -240,7 +248,7 @@ resource01:
 - from container log
 - from volume shared in **/tmp/vault/.vault-token**
 
-3/ Update the vault config in **app.py**
+3/ Update the vault config in **config.yaml**
 
 **Note:**
 

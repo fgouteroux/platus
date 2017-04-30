@@ -9,6 +9,7 @@ from logging.handlers import RotatingFileHandler
 
 from platus.web import web
 from platus.api import api
+from platus.config import config
 
 
 application = Flask(__name__,\
@@ -18,38 +19,7 @@ application = Flask(__name__,\
 application.register_blueprint(web)
 application.register_blueprint(api)
 
-application.config['services'] = "data/services.yaml"
-application.config['users'] = "data/users.yaml"
-
-application.config['persistent_data'] = True
-application.config['persistent_data_backend'] = {"type": "redis",
-                                                 "data": {"host":"redis"}
-                                                }
-application.config['retries_before_notify'] = 3
-application.config['notify'] = True
-application.config['notify_backend'] = {"type": "slack",
-                                        "data": {
-                                            "url": ""
-                                            }
-                                       }
-#application.config['notify_backend'] = {"type": "email",
-#                                        "data": {
-#                                            "fr": "",
-#                                            "to": "",
-#                                            "host": "",
-#                                            "username": "",
-#                                            "password": "",
-#                                            "subject": "Services status changed"
-#                                            }
-#                                        }
-
-application.config['vault'] = False
-application.config['vault_backend'] = {"host": "vault",
-                                       "port": 8200,
-                                       "protocol": "http",
-                                       "token": "",
-                                       "path": "/v1/secret/"}
-
+application.config.update(config.from_yaml("data/config.yaml"))
 
 # Scss
 assets = Environment(application)

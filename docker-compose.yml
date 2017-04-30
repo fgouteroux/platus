@@ -8,14 +8,14 @@ services:
      - 'redis:/data'
 
   core:
-    image: platus
+    image: fgouteroux/platus:core-latest
     ports:
      - "5001:5001"
     volumes:
       - '/tmp/data:/platus/data'
 
   scheduler:
-    image: platus_scheduler
+    image: fgouteroux/platus:scheduler-latest
     environment:
       - PLATUS_HOST=core
       - PLATUS_PORT=5001
