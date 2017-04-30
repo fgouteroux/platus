@@ -54,7 +54,7 @@ Response:
 
 **Platus Users**
 
-Manage users and roles in **users.yaml** (default path in app.py).
+Manage users and roles in **users.yaml** (default path in /data).
 
 Use **roles** to grant permissions to get services status defined in **services.yaml**
 
@@ -79,9 +79,9 @@ user2:
 
 **Platus services**
 
-Create **services.yaml** (default path in app.py).
+Create **services.yaml** (default path in /data).
 
-    application.config['services'] = "services.yaml"
+    application.config['services'] = "/data/services.yaml"
 
 ```yaml
 resource01:
