@@ -46,7 +46,7 @@ def _update_instance_states(client, instance_states, instance_ids=None):
 
                 for instance_state in instance_states:
                     if instance_state["node"] == item["InstanceId"]:
-                        instance_state["state"] = "unhealhty"
+                        instance_state["state"] = "unhealthy"
 
     return instance_states
 
