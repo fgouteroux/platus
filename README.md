@@ -1,14 +1,14 @@
-## Platus
+## What is Platus
 
 Platus is an python flask app to check **platform's health.** The name come from **platform** and **status**.
 You defines wich services you want to monitor and host it on your own server. Services check are based on plugin system.
 
 Currently supported plugins:
 
-- rest_http
-- mongodb
-- celery_worker
-- aws_ec2
+- HTTP Rest
+- MongoDB
+- Celery
+- AWS EC2
 
 
 ## Usage
@@ -17,9 +17,7 @@ Currently supported plugins:
 
 In a browser: *http://localhost:5001*
 
-![platus](screenshots/platus_ok.png)
-
-![platus](screenshots/platus_statuses.png)
+![platus](images/platus.gif)
 
 **Api**
 
@@ -31,32 +29,57 @@ Response:
 
 ```json
 {
-  "result": [ 
+  "result": [
     {
-      "checked": "2016-10-14 11:17:46.351426", 
-      "elapsed": "0:00:00.011404", 
-      "name": "mongodb", 
-      "node": "db01.lan", 
-      "state": "down", 
-      "type": "Database"
-    }, 
+      "checked": "2017-04-30 16:57:57.459312",
+      "last_state": "operational",
+      "name": "myapp03",
+      "node": "abou.gitlab.com",
+      "retries": 14,
+      "state": "unknown",
+      "type": "App"
+    },
     {
-      "checked": "2016-10-14 11:17:49.873978", 
-      "elapsed": "0:00:00.871908", 
-      "name": "docker01", 
-      "node": "docker01.lan", 
-      "state": "operational", 
-      "type": "Docker"
+      "checked": "2017-04-30 16:58:04.687229",
+      "elapsed": "0:00:00.729046",
+      "last_state": "operational",
+      "name": "myapp01",
+      "node": "status.aws.amazon.com",
+      "retries": 18,
+      "state": "unhealthy",
+      "type": "App"
+    },
+    {
+      "checked": "2017-04-30 16:58:06.625887",
+      "elapsed": "0:00:00.857806",
+      "last_state": "operational",
+      "name": "myapp02",
+      "node": "status.github.com",
+      "retries": 0,
+      "state": "operational",
+      "type": "App"
+    },
+    {
+      "checked": "2017-04-30 16:58:05.451147",
+      "last_state": "operational",
+      "name": "EC2 Instance",
+      "node": "i-0ee58c9d8db8be69b",
+      "nodename": "test",
+      "retries": 2,
+      "state": "down",
+      "type": "Infra"
     }
   ]
 }
 ```
 
-**Platus Users**
+**Users**
 
 Manage users and roles in **users.yaml** (default path in /data).
 
 Use **roles** to grant permissions to get services status defined in **services.yaml**
+
+    application.config['users'] = "/data/users.yaml"
 
 
 ```yaml
@@ -77,7 +100,7 @@ user2:
     password: pass
 ```
 
-**Platus services**
+**Services**
 
 Create **services.yaml** (default path in /data).
 
@@ -109,7 +132,7 @@ resource02:
         name: myapp02
 ```
 
-## Platus notifications
+## Notifications
 
 Send a notification if a service status changed. Enable it in app.py:
 
@@ -117,7 +140,6 @@ Send a notification if a service status changed. Enable it in app.py:
 
 When a service state is down or unhealthy, platus will check 3 times before sending a notification to avoid having too many notifications.
 
-![platus](screenshots/platus_retries.png)
 
 This setting could be overriden in app.py:
 
@@ -149,7 +171,7 @@ Platus support multiple notifications backend:
                                                 }
                                             }
 
-## Platus storage
+## Backends
 
 Store services status in a storage backend. Enable it in app.py:
 
@@ -165,7 +187,7 @@ Platus support multiple storage backend:
                                                      "data": {"host":"redis"}
                                                     }
 
-## Vault support
+## Vault
 
 Store services secret in [vault](https://www.vaultproject.io/) and let's platus ask the secret when necessary.
 
@@ -483,7 +505,7 @@ For more examples on filters usage, see http://docs.aws.amazon.com/cli/latest/re
 
 With docker:
 
-    docker-compose up --build
+    docker-compose up
 
 Or:
 
@@ -509,27 +531,33 @@ def logout(client):
 def check_health(client, data):
     response = [...]
     status = None
-    
-    if response['health']:
-        status = {"type": data["type"],
+    try:
+        if response.status_code == 200:
+            status = {"type": data["type"],
+                      "name": data["name"],
+                      "node": client.host,
+                      "state": "operational",
+                      "checked": str(datetime.now()),
+                      "elapsed": str(response.elapsed)
+                     }
+        else:
+            status = {"type": data["type"],
                       "name": data["name"],
                       "node": client.host,
                       "state": "down",
                       "checked": str(datetime.now()),
                       "elapsed": str(response.elapsed)
                      }
-    else:
-        status = {"type": data["type"],
-                  "name": data["name"],
-                  "node": client.host,
-                  "state": "down",
-                  "checked": str(datetime.now()),
-                  "elapsed": str(response.elapsed)
-                  }
-    if status:
-        return status
-    else:
-        raise RuntimeError("Cannot get plugin status")
+        if status:
+            return status
+    except Exception as error_msg:
+
+            return {"type": data["type"],
+                    "name": data["name"],
+                    "node": client.host,
+                    "state": "unknown",
+                    "checked": str(datetime.now())
+                   }
 ```
 
 
