@@ -5,10 +5,8 @@ cssmin
 Flask-HTTPAuth
 Flask-WTF
 pyyaml
-celery
 pymongo
 requests
 redis
 gunicorn
-eventlet
 boto3

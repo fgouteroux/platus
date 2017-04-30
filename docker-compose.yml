@@ -7,21 +7,17 @@ services:
     volumes:
      - 'redis:/data'
 
-  platus:
-    build: .
+  core:
+    image: platus
     ports:
      - "5001:5001"
     volumes:
-     - '.:/platus'
-    command: gunicorn -c "platus/config/gunicorn.py" app:application --reload
+      - '/tmp/data:/platus/data'
 
-  celery:
-    build: .
-    command: celery worker -B -l info -A celery_app.app
-    volumes:
-      - '.:/platus'
+  scheduler:
+    image: platus_scheduler
     environment:
-      - PLATUS_HOST=platus
+      - PLATUS_HOST=core
       - PLATUS_PORT=5001
       - PLATUS_USER=admin
       - PLATUS_PASS=admin

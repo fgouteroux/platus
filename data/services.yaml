@@ -9,6 +9,7 @@ aws:
     data:
         type: App
         name: myapp01
+        search: toto
 
 github:
     role: 
@@ -28,9 +29,20 @@ gitlab:
         - app
     type: rest_http
     properties:
-        host: gitlab.com
+        host: abou.gitlab.com
         port: 443
         protocol: https
     data:
         type: App
         name: myapp03
+
+ec2:
+    role: admin
+    type: aws_ec2
+    properties:
+        region: "eu-central-1"
+        access_key: "aws-access-key"
+        secret_key: "aws-secret-key"
+    data:
+        type: Infra
+        name: EC2 Instance

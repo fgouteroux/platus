@@ -18,8 +18,8 @@ application = Flask(__name__,\
 application.register_blueprint(web)
 application.register_blueprint(api)
 
-application.config['services'] = "services.yaml"
-application.config['users'] = "users.yaml"
+application.config['services'] = "data/services.yaml"
+application.config['users'] = "data/users.yaml"
 
 application.config['persistent_data'] = True
 application.config['persistent_data_backend'] = {"type": "redis",
