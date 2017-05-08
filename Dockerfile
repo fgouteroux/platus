@@ -4,7 +4,7 @@ MAINTAINER François Gouteroux <francois.gouteroux@gmail.com>
 RUN useradd --user-group --create-home --shell /bin/false platus
 
 ENV INSTALL_PATH /platus
-RUN mkdir -p $INSTALL_PATH && chown platus:platus /platus
+RUN mkdir -p $INSTALL_PATH && chown -R platus:platus /platus
 
 WORKDIR $INSTALL_PATH
 
