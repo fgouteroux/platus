@@ -353,7 +353,7 @@ If **"search" dict** is not in **response dict**, resource state become **unheal
 
 **Other options**:
 
-- **request_format**: set Content-Type and Accept headers (default: application/json)
+- **request_headers**: update http headers request.
 
 **Examples:**
 
@@ -401,7 +401,8 @@ resource01:
         host: resource1.lan
         port: 80
         protocol: http
-        token: token123456
+        request_headers:
+            "PRIVATE-TOKEN": token123456
     data:
         type: App
         name: myapp01

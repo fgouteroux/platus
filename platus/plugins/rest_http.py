@@ -61,13 +61,13 @@ def login(host, protocol="https", port=443, **kwargs):
     if "username" and "password" in kwargs:
         conn.auth = (kwargs["username"], kwargs["password"])
 
+    conn.headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
     if "request_headers" in kwargs:
-        conn.headers = kwargs["request_headers"]
-    else:
-        conn.headers = {
-            "Content-Type": "application/json",
-            "Accept": "application/json",
-        }
+        conn.headers.update(kwargs["request_headers"])
 
     if "cert" and "key" in kwargs:
         key_file = tempfile.NamedTemporaryFile()
