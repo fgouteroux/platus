@@ -366,7 +366,8 @@ resource02:
         host: host02.lan
         port: 8140
         protocol: https
-        request_format: text/pson
+        request_headers:
+            "Content-Type": "text/pson"
         cert: "-----BEGIN CERTIFICATE-----\n-----END CERTIFICATE-----"
         key: "-----BEGIN RSA PRIVATE KEY-----\n-----END RSA PRIVATE KEY-----"
     data:
