@@ -1,3 +1,5 @@
+[![Docker Automated buil](https://img.shields.io/docker/automated/jrottenberg/ffmpeg.svg)](https://hub.docker.com/r/fgouteroux/platus/)
+
 ## What is Platus
 
 Platus is an python flask app to check **platform's health.** The name come from **platform** and **status**.
