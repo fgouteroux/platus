@@ -27,7 +27,7 @@ class Config:
     CELERYBEAT_SCHEDULE = {
         'update-status': {
             'task': 'update-services-status',
-            'schedule': timedelta(seconds=60),
+            'schedule': timedelta(seconds=os.getenv('CHECK_INTERVAL', 60)),
         }
     }
 

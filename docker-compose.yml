@@ -22,6 +22,7 @@ services:
       - PLATUS_USER=admin
       - PLATUS_PASS=admin
       - REDIS_URL=redis://redis:6379/0
+      - CHECK_INTERVAL=120
 
 volumes:
   redis:
