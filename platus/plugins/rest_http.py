@@ -22,7 +22,8 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 Client = namedtuple('Client',
-                    ['host', 'conn', 'base_url', 'key_file', 'cert_file'])
+                    ['host', 'conn', 'base_url', \
+                     'key_file', 'cert_file', 'timeout'])
 
 def login(host, protocol="https", port=443, **kwargs):
     """Login to the rest http plugin
@@ -84,14 +85,15 @@ def login(host, protocol="https", port=443, **kwargs):
         cert_file = None
 
     if "timeout" in kwargs:
-        conn.timeout = kwargs["timeout"]
+        timeout = kwargs["timeout"]
     else:
-        conn.timeout = 30
+        timeout = 30
 
     conn.verify = False
 
-    client = Client(host=host, base_url=base_url, conn=conn,
-                    key_file=key_file, cert_file=cert_file)
+    client = Client(host=host, base_url=base_url, \
+                    conn=conn, key_file=key_file, \
+                    cert_file=cert_file, timeout=timeout)
     atexit.register(logout, client)
     return client
 
@@ -138,7 +140,7 @@ def check_health(client, data):
         url = client.base_url
 
     try:
-        response = client.conn.get(url)
+        response = client.conn.get(url, timeout=client.timeout)
         status = None
 
         app.logger.debug("rest_http - status code: {0} => {1}"\

@@ -9,13 +9,26 @@ from __future__ import absolute_import
 __author__ = "François Gouteroux <francois.gouteroux@gmail.com>"
 
 # Import Python libs
-import six
-import yaml
-import importlib
+from threading import Thread
 from datetime import datetime
 
 # Import third party libs
+import six
+import yaml
+import importlib
 from flask import current_app as app
+
+
+class FlaskThread(Thread):
+    """Subclass thread with flask app context"""
+    def __init__(self, *args, **kwargs):
+        super(FlaskThread, self).__init__(*args, **kwargs)
+        self.app = app._get_current_object()
+
+    def run(self):
+        with self.app.app_context():
+            super(FlaskThread, self).run()
+
 
 def _get_storage_module():
     """Return storage client"""
@@ -86,7 +99,7 @@ def _notify(services_states):
         call_storage_bd.set_service_status(client, service)
 
     if report_changes:
-        app.logger.debug("Some services status changed.")
+        app.logger.info("Some services status changed.")
         app.logger.debug(report_changes)
         notify_backend = app.config['notify_backend']["type"]
         app.logger.debug("Try importing notify backend %s" % notify_backend)
@@ -94,6 +107,52 @@ def _notify(services_states):
                                                   .format(notify_backend))
 
         call_notify_bd.send(app.config['notify_backend']['data'], report_changes)
+
+
+def _run(name, service, services_states, vault):
+    """ get service status """
+
+    try:
+        app.logger.info("Read service %s" % name)
+        app.logger.debug("Try importing plugin %s" % service["type"])
+        call_service = importlib.import_module("platus.plugins.{0}"\
+                                              .format(service["type"]))
+
+        if vault:
+            _get_vault_secret(
+                vault["client"],
+                vault["module"],
+                service["properties"])
+
+        client = call_service.login(**service["properties"])
+        status = call_service.check_health(client, service["data"])
+
+        app.logger.debug("service status: %s" % status)
+
+        if isinstance(status, list):
+            for i in status:
+                services_states.append(i)
+        else:
+            services_states.append(status)
+
+    except RuntimeError as error:
+        host = service["properties"]['host']
+        status = {
+            "type": service["data"]["type"],
+            "name": service["data"]["name"],
+            "state": "down",
+            "checked": str(datetime.now()),
+            "retries": service.get("retries", 0)
+        }
+        if isinstance(host, list):
+            for item in host:
+                status["node"] = item
+        else:
+            status["node"] = host
+
+        services_states.append(status)
+        app.logger.error("Unable to get service status. Reason: %s" % error)
+
 
 def services_status(roles):
     """Check services health"""
@@ -107,58 +166,30 @@ def services_status(roles):
         app.logger.error(message)
         return [message]
 
+
     vault = app.config.get("vault", False)
     if vault:
         vault_call = importlib.import_module("platus.vault")
         vault_client = vault_call.login(**app.config["vault_backend"])
+        vault_data = {
+            "module": vault_call,
+            "client": vault_client
+        }
+    else:
+        vault_data = {}
 
+    threads = []
     for name, service in six.iteritems(get_services):
 
         if "admin" in roles or (set(roles) & set(service["role"])):
-            plugin = service["type"]
 
-            try:
-                app.logger.debug("Read service %s" % name)
-                app.logger.debug("Try importing plugin %s" % plugin)
-                call_service = importlib.import_module("platus.plugins.{0}"\
-                                                      .format(plugin))
+            thr = FlaskThread(target=_run,
+                              args=[name, service, services_states, vault_data])
+            thr.start()
+            threads.append(thr)
 
-                if vault:
-                    _get_vault_secret(vault_client, vault_call, service["properties"])
-
-                client = call_service.login(**service["properties"])
-                status = call_service.check_health(client, service["data"])
-
-                app.logger.debug("service status: %s" % status)
-
-                if isinstance(status, list):
-                    for i in status:
-                        services_states.append(i)
-                else:
-                    services_states.append(status)
-
-            except RuntimeError as error:
-                host = service["properties"]['host']
-                if isinstance(host, list):
-                    for item in host:
-                        status = {"type": service["data"]["type"],
-                                  "name": service["data"]["name"],
-                                  "node": item,
-                                  "state": "down",
-                                  "checked": str(datetime.now()),
-                                  "retries": service.get("retries", 0)
-                                 }
-                else:
-                    status = {"type": service["data"]["type"],
-                              "name": service["data"]["name"],
-                              "node": host,
-                              "state": "down",
-                              "checked": str(datetime.now()),
-                              "retries": service.get("retries", 0)
-                             }
-
-                services_states.append(status)
-                app.logger.error("Unable to get service status. Reason: %s" % error)
+    for thread in threads:
+        thread.join()
 
     if services_states:
 

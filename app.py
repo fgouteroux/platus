@@ -37,6 +37,16 @@ assets.debug = False
 application.config['ASSETS_DEBUG'] = False
 
 # Set Logger
+log_levels = {
+    "info": logging.INFO,
+    "debug": logging.DEBUG,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL
+}
+
+log_level = log_levels[application.config.get("log_level", "info")]
+
+
 log = logging.getLogger(__name__)
 console_formatter = logging.Formatter(
             '%(levelname)s\t%(filename)s:%(lineno)d\t\t%(message)s', '%m-%d %H:%M:%S')
@@ -44,17 +54,16 @@ file_formatter = logging.Formatter(
             '%(levelname)s - %(asctime)s - %(pathname)s - %(lineno)d - %(message)s', '%m-%d %H:%M:%S')
 
 console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.DEBUG)
+console_handler.setLevel(log_level)
 console_handler.setFormatter(console_formatter)
 
 rotatingfile_handler = RotatingFileHandler('platus.log', maxBytes=10000, backupCount=1)
-rotatingfile_handler.setLevel(logging.DEBUG)
+rotatingfile_handler.setLevel(log_level)
 rotatingfile_handler.setFormatter(file_formatter)
 
-log.addHandler(console_handler)
-log.addHandler(rotatingfile_handler)
-log.setLevel(logging.DEBUG)
-
+application.logger.addHandler(console_handler)
+application.logger.addHandler(rotatingfile_handler)
+application.logger.setLevel(log_level)
 
 if __name__ == '__main__':
-    application.run(host="0.0.0.0", debug=True, port=5001)
+    application.run(host="0.0.0.0", port=5001)
