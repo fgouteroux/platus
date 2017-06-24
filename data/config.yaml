@@ -2,6 +2,7 @@
 # Global config
 services: data/services.yaml
 users: data/users.yaml
+log_level: info
 
 # Storage backend
 persistent_data: True
